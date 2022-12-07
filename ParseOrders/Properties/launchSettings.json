@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ParseOrders": {
+      "commandName": "Project",
+      "commandLineArgs": "orderfile.txt"
+    }
+  }
+}
