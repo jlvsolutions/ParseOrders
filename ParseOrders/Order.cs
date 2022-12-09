@@ -1,5 +1,4 @@
-﻿using ParseOrders.Extensions;
-using ParseOrders.Records;
+﻿using ParseOrders.Records;
 
 namespace ParseOrders
 {
@@ -18,11 +17,11 @@ namespace ParseOrders
             Errors = new List<string>();
         }
 
-        public static Order Create(StreamReader stream)
+        public static Order Create(RecordReader stream)
         {
-            Order order = new Order();
+            Order order = new ();
 
-            string? record = stream.LastReadRecord() ?? stream.ReadRecord();
+            string? record = stream.LastReadRecord ?? stream.ReadRecord();
 
             while (record != null)
             { 

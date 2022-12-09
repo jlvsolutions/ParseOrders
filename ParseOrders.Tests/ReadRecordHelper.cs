@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ParseOrders.Extensions;
+using ParseOrders.Records;
 
-namespace ParseOrders.Tests.Extensions
+namespace ParseOrders.Tests
 {
     public static class ReadRecordHelper
     {
         static MemoryStream? _ms;
         static StreamWriter? _sw;
-        static StreamReader? _sr;
+        static RecordReader? _rr;
 
         public static void Close()
         {
@@ -21,7 +21,7 @@ namespace ParseOrders.Tests.Extensions
                 _sw.Dispose();
         }
 
-        public static StreamReader Seed(params string[] recs)
+        public static RecordReader Seed(params string[] recs)
         {
             Close();
             _ms = new MemoryStream();
@@ -32,9 +32,9 @@ namespace ParseOrders.Tests.Extensions
                 _sw.WriteLine(s);
             _sw.Flush();
             _ms.Seek(0, SeekOrigin.Begin);
-            _sr = new StreamReader(_ms);
-            _sr.ClearRecordDefs();
-            return new StreamReader(_ms);
+            _rr = new RecordReader(_ms);
+            _rr.ClearRecordDefs();
+            return new RecordReader(_ms);
         }
     }
 }

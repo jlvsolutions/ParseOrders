@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ParseOrders.Extensions;
 using ParseOrders.Records;
 
 namespace ParseOrders
@@ -15,7 +14,7 @@ namespace ParseOrders
 
         public void ParseFile(string fileName)
         {
-            using StreamReader stream = new StreamReader(fileName);
+            using RecordReader stream = new RecordReader(fileName);
             
             // Inform the reader of valid record definitions.
             stream.AddRecordDef(HeaderRecord.Definition);

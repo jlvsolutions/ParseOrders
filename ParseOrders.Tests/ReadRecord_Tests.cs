@@ -3,9 +3,9 @@ using System.IO;
 using System.Text;
 
 using ParseOrders;
-using ParseOrders.Extensions;
+using ParseOrders.Records;
 
-namespace ParseOrders.Tests.Extensions
+namespace ParseOrders.Tests
 {
     public class ReadRecord_Tests
     {
@@ -20,11 +20,11 @@ namespace ParseOrders.Tests.Extensions
         public void ReadRecord_ShouldReturnFirstGoodWhenBadLineType()
         {
             // Arrange
-            StreamReader sr = ReadRecordHelper.Seed("9001234567890", "1000987654321", "1003333333333");
-            sr.AddRecordDef(_testDef);
+            RecordReader rr = ReadRecordHelper.Seed("9001234567890", "1000987654321", "1003333333333");
+            rr.AddRecordDef(_testDef);
 
             // Act
-            string? rec = sr.ReadRecord();
+            string? rec = rr.ReadRecord();
 
             // Assert
             Assert.Equal("1000987654321", rec);
@@ -34,11 +34,11 @@ namespace ParseOrders.Tests.Extensions
         public void ReadRecord_ShouldReturnFirstGoodWhenBadRecordLength()
         {
             // Arrange
-            StreamReader sr = ReadRecordHelper.Seed("1001234567890MMM", "1000987654321", "1003333333333");
-            sr.AddRecordDef(_testDef);
+            RecordReader rr = ReadRecordHelper.Seed("1001234567890MMM", "1000987654321", "1003333333333");
+            rr.AddRecordDef(_testDef);
 
             // Act
-            string? rec = sr.ReadRecord();
+            string? rec = rr.ReadRecord();
 
             // Assert
             Assert.Equal("1000987654321", rec);
@@ -48,21 +48,21 @@ namespace ParseOrders.Tests.Extensions
         public void ReadRecord_ShouldReadAllValidRecords()
         {
             // Arrange
-            StreamReader sr = ReadRecordHelper.Seed("1001234567890", 
+            RecordReader rr = ReadRecordHelper.Seed("1001234567890", 
                                                     "1XX000987654321", 
                                                     "1003333333333x", 
                                                     "1001234512345",
                                                     "400111987654321",
                                                     "50011223344556677889900"
                                                     );
-            sr.AddRecordDef(_testDef);
-            sr.AddRecordDef(new RecordDef("400", 15));
-            sr.AddRecordDef(new RecordDef("500", 23));
+            rr.AddRecordDef(_testDef);
+            rr.AddRecordDef(new RecordDef("400", 15));
+            rr.AddRecordDef(new RecordDef("500", 23));
 
             // Act
             List<string?> recs = new();
             string? rec;
-            while ((rec = sr.ReadRecord()) != null)
+            while ((rec = rr.ReadRecord()) != null)
                 recs.Add(rec);
 
             // Assert
@@ -77,13 +77,13 @@ namespace ParseOrders.Tests.Extensions
         public void ReadRecord_ShouldSkipOverEmptyRecords()
         {
             // Arrange
-            StreamReader sr = ReadRecordHelper.Seed("1001234567890", "\0", "", "100ONETWOFOUR");
-            sr.AddRecordDef(_testDef);
+            RecordReader rr = ReadRecordHelper.Seed("1001234567890", "\0", "", "100ONETWOFOUR");
+            rr.AddRecordDef(_testDef);
 
             // Act
             List<string?> recs = new();
             string? rec;
-            while ((rec = sr.ReadRecord()) != null)
+            while ((rec = rr.ReadRecord()) != null)
                 recs.Add(rec);
 
             // Assert
@@ -96,13 +96,13 @@ namespace ParseOrders.Tests.Extensions
         public void ReadRecord_ShouldSkipOverRecordsNotDefined()
         { 
             // Arrange
-            StreamReader sr = ReadRecordHelper.Seed("1001234567890", "\0", "", "100ONETWOFOUR");
-            sr.AddRecordDef(new RecordDef("101", 13));
+            RecordReader rr = ReadRecordHelper.Seed("1001234567890", "\0", "", "100ONETWOFOUR");
+            rr.AddRecordDef(new RecordDef("101", 13));
 
             // Act
             List<string?> recs = new();
             string? rec;
-            while ((rec = sr.ReadRecord()) != null)
+            while ((rec = rr.ReadRecord()) != null)
                 recs.Add(rec);
 
             // Assert

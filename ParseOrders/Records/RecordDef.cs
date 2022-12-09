@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParseOrders
+namespace ParseOrders.Records
 {
     /// <summary>
     /// Identifies a valid data file record.
