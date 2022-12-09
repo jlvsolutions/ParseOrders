@@ -3,28 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ParseOrders.Extensions;
+using ParseOrders.Records;
 
 namespace ParseOrders
 {
     internal class Orders
     {
-        private readonly List<Order> _orders;
-
-        public Orders()
-        {
-            _orders = new List<Order>();
-        }
+        public List<Order> OrdersList = new();
+        public bool HasErrors => OrdersList.Any(o => !o.Success);
 
         public void ParseFile(string fileName)
         {
             using StreamReader stream = new StreamReader(fileName);
+            
+            // Inform the reader of valid record definitions.
+            stream.AddRecordDef(HeaderRecord.Definition);
+            stream.AddRecordDef(AddressRecord.Definition);
+            stream.AddRecordDef(LineItemRecord.Definition);
+
             while (!stream.EndOfStream)
             {
-                var order = Order.Create(stream);
-                _orders.Add(order);
+                OrdersList.Add(Order.Create(stream));
             }
+            stream.Close();
         }
-
-        public List<Order> OrderList => _orders;
     }
 }

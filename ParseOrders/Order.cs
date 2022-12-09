@@ -1,81 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ParseOrders.Extensions;
+using ParseOrders.Records;
 
 namespace ParseOrders
 {
     internal class Order
     {
-        private List<string> _errors;
-        private HeaderRecord? _header;
-        private AddressRecord? _address;
-        private List<LineItemRecord>? _lineItems;
+        public HeaderRecord? Header;
+        public AddressRecord? Address;
+        public List<LineItemRecord> LineItems;
+        public List<string> Errors;
+        
+        public bool Success => Errors.Count == 0;
 
         public Order()
         {
-            _errors = new List<string>();
+            LineItems = new List<LineItemRecord>();
+            Errors = new List<string>();
         }
+
         public static Order Create(StreamReader stream)
         {
             Order order = new Order();
 
-            // Header record
-            var record = stream.ReadLine();
-            if (record == null) // safety checks
-                return order;
-            try
-            {
-                order._header = HeaderRecord.Create(record);
-            }
-            catch(Exception ex)
-            {
-                var msg = $"An error occurred while parsing this order's header record:  {ex.Message}";
-                order._errors.Add(msg);
-                Console.Error.WriteLine(msg);
-            }
+            string? record = stream.LastReadRecord() ?? stream.ReadRecord();
 
-            // Address record
-            record = stream.ReadLine();
-            if (record == null)
-                return order;
-            try
-            {
-                order._address = AddressRecord.Create(record);
-            }
-            catch(Exception ex)
-            {
-                var msg = $"An error occurred while parsing this order's address record:  {ex.Message}";
-                order._errors.Add(msg);
-                Console.Error.WriteLine(msg);
-            }
-
-            order._lineItems = new List<LineItemRecord>();
-            while (stream.Peek() == '3')
-            {
-                record = stream.ReadLine();
-                try
+            while (record != null)
+            { 
+                if (HeaderRecord.Definition.IsMatch(record))
                 {
-                    order._lineItems.Add(LineItemRecord.Create(record!));  // peek ensures record not null
+                    // Header record
+                    try { order.Header = HeaderRecord.Create(record); }
+                    catch (Exception ex)
+                    {
+                        var msg = $"An error occurred while parsing this order's header record:  {ex.Message}";
+                        order.Errors.Add(msg);
+                        Console.Error.WriteLine(msg);
+                    }
                 }
-                catch(Exception ex)
+                else if (AddressRecord.Definition.IsMatch(record))
                 {
-                    var msg = $"An error occurred while parsing a line item for this order:  {ex.Message}";
-                    order._errors.Add(msg);
-                    Console.Error.WriteLine(msg);
+                    // Address record
+                    try { order.Address = AddressRecord.Create(record); }
+                    catch (Exception ex)
+                    {
+                        var msg = $"An error occurred while parsing this order's address record:  {ex.Message}";
+                        order.Errors.Add(msg);
+                        Console.Error.WriteLine(msg);
+                    }
                 }
-            }
-            // End of line items or EOF reached.
+                else if (LineItemRecord.Definition.IsMatch(record))
+                {
+                    // Line item records
+                    try { order.LineItems.Add(LineItemRecord.Create(record)); }
+                    catch (Exception ex)
+                    {
+                        var msg = $"An error occurred while parsing a line item for this order:  {ex.Message}";
+                        order.Errors.Add(msg);
+                        Console.Error.WriteLine(msg);
+                    }
+                }
 
+                record = stream.ReadRecord();
+                if (HeaderRecord.Definition.IsMatch(record)) // We have started a new order
+                {
+                    return order;
+                }
+
+            }
             return order;
         }
-
-        public HeaderRecord? Header => _header;
-        public AddressRecord? Address => _address;
-        public List<LineItemRecord>? lineItems => _lineItems;
-        public bool Success => _errors.Count == 0;
-        public List<string> Errors => _errors;
-
     }
 }
